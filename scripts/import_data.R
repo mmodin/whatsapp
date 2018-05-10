@@ -25,10 +25,12 @@ dt <- data.table(
     text = str_extract(data, regex("(?<=\\:[:space:]).*$"))
     )
 
+# 
+
 # Emoji count
 dt[, emoji_count := str_count(text, regex("\\p{So}|\\p{Cn}"))] # this needs fixin
 
-# Remove UTF-8 characters
+# Remove non UTF-8 characters
 dt[, text := gsub("\\p{So}|\\p{Cn}", "", text, perl = TRUE)]
 
 # Character count
