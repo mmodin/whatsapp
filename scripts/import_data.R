@@ -2,10 +2,10 @@ library(data.table)
 library(stringr)
 library(plotly)
 rm(list = ls())
-
-
 dir <- "e:/datascience/projects/whatsapp/"
 setwd(dir)
+source("./scripts/functions.R")
+
 
 # Read data
 data <- unlist(
@@ -38,7 +38,7 @@ dt[, char_count := nchar(text)]
 dt[, image := grepl("\\<bild utesluten\\>", text)]
 
 # Add date
-dt[, date := format(timestamp, format = "%Y-%m-%d")]
+dt[, date := as.Date(format(timestamp, format = "%Y-%m-%d"))]
 
 
 # Descriptive statistics: character count
@@ -56,13 +56,14 @@ dt[, .(average = mean(emoji_count),
 # Descriptive statistics: emoji count
 dt[image == TRUE, .(image_count = .N), by = .(author)]
 
-
-# A
 # Aggregate message count
-daily <- dt[, .(N = .N), by = date]
 
-plot_ly(daily, x = ~date, y = ~N)
+daily <- dt[, .(count = .N,
+                emoji_count = sum(emoji_count),
+                char_count = mean(char_count)), 
+            by = .(date, author)]
 
-
-
+bartime(daily, x = ~date, y = ~count, split = ~author, yaxis = "Message Count")
+bartime(daily, x = ~date, y = ~emoji_count, split = ~author, yaxis = "Emoji Count")
+bartime(daily, x = ~date, y = ~char_count, split = ~author, yaxis = "Character Count")
 
